@@ -1,5 +1,5 @@
-NAME     := run
-SRCS     := main.cpp
+NAME     := btc
+SRCS     := main.cpp BitcoinExchange.cpp
 OBJS     := $(SRCS:.cpp=.o)
 
 all: $(NAME)
