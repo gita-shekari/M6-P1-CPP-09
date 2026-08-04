@@ -8,7 +8,7 @@
 
 typedef struct s_date
 {
-	int day,
+	int day;
 	int month;
 	int year;
 }t_date;
@@ -16,7 +16,7 @@ typedef struct s_date
 typedef struct s_line
 {
 	t_date input_date;
-	unsigned int price;
+	double value;
 }t_line;
 
 class BitcoinChange
@@ -26,9 +26,10 @@ class BitcoinChange
 		BitcoinChange(const BitcoinChange &other);
 		BitcoinChange &operator=(const BitcoinChange &other);
 		~BitcoinChange();
+		//bool operator<(const Date& lhs, const Date& rhs);
 
 	private:
-		std::multimap<t_date, unsigned int> data;
+		std::map<s_date, double> data;
 
-}
+};
 #endif
