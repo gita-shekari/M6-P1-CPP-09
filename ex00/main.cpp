@@ -1,7 +1,19 @@
 
 #include "BitcoinExchange.hpp"
-#include <fstream>
 
+
+void parse_data(std::string data)
+{
+	std::ifstream inFile(data);
+	if (!inFile.is_open())
+		throw std::runtime_error("data.csv can not be opened!");
+	std::string line;
+	BitcoinChange bc = new BitcoinChange();
+	while(getline(inFile, line))
+	{
+		bc.data<>
+	}
+}
 bool vlaidate_title(std::string line)
 {
 	if (line == "date | value")
@@ -24,7 +36,7 @@ void parse_line(const std::string& line)
 	std::cout << "Date : " << date << std::endl;
 	std::cout << "Value: " << v << std::endl;
 }
-void parse_file(char *fileName)
+void parse_input(char *fileName)
 {
 	std::ifstream inFile(fileName);
 	if (!inFile.is_open())
@@ -58,10 +70,11 @@ int main(int ac, char **av)
 		std::cout << "input is not valid" << std::endl;
 		return 1;
 	}
-	
+
 	try
 	{
-		parse_file(av[1]);
+		parse_data("data.csv");
+		parse_input(av[1]);
 	}
 	catch(const std::exception& e)
 	{

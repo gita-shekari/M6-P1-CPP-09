@@ -1,9 +1,10 @@
-#ifndef BITCOINCHANGE_HPP
-#define BITCOINCHANGE_HPP
+#ifndef BITCOINEXCHANGE_HPP
+#define BITCOINEXCHANGE_HPP
 
 #include <algorithm>
 #include <iostream>
 #include <exception>
+#include <fstream>
 #include <map>
 
 typedef struct s_date
@@ -13,23 +14,25 @@ typedef struct s_date
 	int year;
 }t_date;
 
-typedef struct s_line
+typedef struct s_record
 {
-	t_date input_date;
+	t_date _date;
 	double value;
-}t_line;
+}t_record;
 
-class BitcoinChange
+class BitcoinExchange
 {
 	public:
-		BitcoinChange();
-		BitcoinChange(const BitcoinChange &other);
-		BitcoinChange &operator=(const BitcoinChange &other);
-		~BitcoinChange();
-		//bool operator<(const Date& lhs, const Date& rhs);
+		BitcoinExchange();
+		BitcoinExchange(const BitcoinExchange &other);
+		BitcoinExchange &operator=(const BitcoinExchange &other);
+		~BitcoinExchange();
+		void loadData(const std::string& filename);
+		void processInput(const std::string& filename);
 
 	private:
-		std::map<s_date, double> data;
+		std::map<t_date, double> _data;
 
 };
+bool operator<(const t_date& lhs, const t_date& rhs);
 #endif
