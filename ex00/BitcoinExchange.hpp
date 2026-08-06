@@ -5,6 +5,7 @@
 #include <iostream>
 #include <exception>
 #include <fstream>
+#include <cctype>
 #include <map>
 
 typedef struct s_date
