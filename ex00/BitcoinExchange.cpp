@@ -106,6 +106,7 @@ void BitcoinExchange::processRecord(t_record rec)
 	it = _data.upper_bound(rec.date);
 	if (it != _data.begin())
 		--it;
+	std::cout << std::setprecision(10);
 	std::cout << rec.date << " => " << rec.value << " = " << rec.value * it->second << std::endl;
 }
 void BitcoinExchange::loadData(const std::string &filename)
