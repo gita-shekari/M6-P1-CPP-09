@@ -100,6 +100,11 @@ t_record BitcoinExchange::parse_record(const std::string &line, const char c)
 
 void BitcoinExchange::processInput(t_record rec)
 {
+	//    │
+    //        ├── find closest/equal date in _data
+    //        ├── get exchange rate
+    //        └── calculate value × rate
+	
 
 }
 void BitcoinExchange::loadData(const std::string &filename)
