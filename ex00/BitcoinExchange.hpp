@@ -1,39 +1,38 @@
 #ifndef BITCOINEXCHANGE_HPP
 #define BITCOINEXCHANGE_HPP
 
-#include <algorithm>
 #include <iostream>
-#include <exception>
 #include <fstream>
-#include <cctype>
+#include <string>
 #include <map>
+#include <stdexcept>
+#include <cstdlib>
+#include <cctype>
 
-typedef struct s_date
+struct t_record
 {
-	int day;
-	int month;
-	int year;
-}t_date;
-
-typedef struct s_record
-{
-	t_date _date;
-	double value;
-}t_record;
+	std::string date;
+	double		value;
+};
 
 class BitcoinExchange
 {
+	private:
+		std::map<std::string, double> _data;
+
+		void		checkFormat(const std::string &raw);
+		void		validateDate(const std::string &date);
+		bool		isLeapYear(int year);
+		double		parseValue(const std::string &raw);
+		t_record	parse_record(const std::string &line, const char c);
+
 	public:
 		BitcoinExchange();
 		BitcoinExchange(const BitcoinExchange &other);
 		BitcoinExchange &operator=(const BitcoinExchange &other);
 		~BitcoinExchange();
-		void loadData(const std::string& filename);
-		void processInput(const std::string& filename);
-
-	private:
-		std::map<t_date, double> _data;
-
+		void		loadData(const std::string &filename);
+		void		processInput(const std::string &filename);
 };
-bool operator<(const t_date& lhs, const t_date& rhs);
+
 #endif

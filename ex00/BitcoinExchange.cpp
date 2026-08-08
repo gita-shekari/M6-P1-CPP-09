@@ -1,7 +1,7 @@
 #include "BitcoinExchange.hpp"
 
 BitcoinExchange::BitcoinExchange(){}
-BitcoinExchange::BitcoinExchange(const BitcoinExchange &other):data(other._data){}
+BitcoinExchange::BitcoinExchange(const BitcoinExchange &other):_data(other._data){}
 BitcoinExchange &BitcoinExchange::operator=(const BitcoinExchange &other)
 {
 	if(this != &other)
@@ -15,7 +15,7 @@ BitcoinExchange::~BitcoinExchange(){}
 void BitcoinExchange::checkFormat(const std::string &raw)
 {
 	if(raw.length() != 10)
-		throw runtime_error("Wrong format of date!");
+		throw std::runtime_error("Wrong format of date!");
 	if (raw[4] != '-' || raw[7] != '-')
 		throw std::runtime_error("Wrong format of date!");
 	for(size_t i = 0; i < raw.length(); i++)
@@ -26,18 +26,7 @@ void BitcoinExchange::checkFormat(const std::string &raw)
 			throw std::runtime_error("Wrong format of date!");
 	}
 }
-t_date BitcoinExchange::extractDate(const std::string &raw)
-{
-	std::string y = raw.substr(0 , 4);
-	std::string m = raw.substr(5 , 2);
-	std::string d = raw.substr(8 , 2);
-	t_date _date;
-	_date.year = std::atoi(y.c_str());
-	_date.month = std::atoi(m.c_str());
-	_date.day = std::atoi(d.c_str());
-	return _date;
-}
-bool BitcoinExchange::isLeapyaer(int year)
+bool BitcoinExchange::isLeapYear(int year)
 {
 	if (year % 4 != 0)
 		return false;
@@ -47,71 +36,115 @@ bool BitcoinExchange::isLeapyaer(int year)
 		return true;
 	return false;
 }
-void BitcoinExchange::validateDate(const t_date &_date)
+void BitcoinExchange::validateDate(const std::string &date)
 {
-	if(_date.year <= 0)
+	int year = std::atoi(date.substr(0, 4).c_str());
+	int month = std::atoi(date.substr(5, 2).c_str());
+	int day = std::atoi(date.substr(8, 2).c_str());
+	if (year <= 0)
 		throw std::runtime_error("Invalid year!");
-	if(_date.month > 12 || _date.month  < 1)
+	if (month < 1 || month > 12)
 		throw std::runtime_error("Invalid month!");
-	if(_date.day > 31 || _date.day  < 1)
-		throw std::runtime_error("Invalid month!");
-	if((_date.month == 4 || _date.month == 6 || _date.month == 9 || _date.month == 11)
-			&& (_date.day > 30))
+	if (day < 1 || day > 31)
 		throw std::runtime_error("Invalid day!");
-	if(_date.month == 2)
-		if(isLeapyaer(_date.year))
-			if(day > 28)
+	if ((month == 4 || month == 6 || month == 9 || month == 11) && day > 30)
+		throw std::runtime_error("Invalid day!");
+	if (month == 2)
+	{
+		if (isLeapYear(year))
+		{
+			if (day > 29)
 				throw std::runtime_error("Invalid day!");
+		}
+		else
+		{
+			if (day > 28)
+				throw std::runtime_error("Invalid day!");
+		}
 	}
-
-t_date BitcoinExchange::parseDate(const std::string &raw)
-{
-	checkFormat(raw);
-	t_date d = extractDate(raw);
-	validateDate(d);
-	return d;
-
 }
+
 double BitcoinExchange::parseValue(const std::string &raw)
 {
-	double d = std::
+	char *end;
+	double value = std::strtod(raw.c_str(), &end);
+	if (end == raw.c_str() || *end != '\0')
+		throw std::runtime_error("Invalid value!");
+	return value;
 }
-t_record BitcoinExchange::parse_record(const std::string &line)
+t_record BitcoinExchange::parse_record(const std::string &line, const char c)
 {
-	t_record rec;
-	size_t pos = line.find(',');
-	if(pos == std::string::npos)
-		throw std::runtime_error("Wrong format of data!");
-	try
+	size_t pos = line.find(c);
+	if (pos == std::string::npos)
+		throw std::runtime_error("missing separator or value!");
+	t_record record;
+	if (c == ',')
 	{
-		rec.date = parseDate(line.substr(0, pos));
-		rec.value = parseValue(line.substr(pos + 1));
-		return rec;
+		record.date = line.substr(0, pos);
+		record.value = parseValue(line.substr(pos + 1));
 	}
-	catch(const std::exception& e)
+	else if (c == '|')
 	{
-		std::cerr << e.what() << '\n';
+		if (pos == 0 || pos + 1 >= line.size()
+			|| line[pos - 1] != ' ' || line[pos + 1] != ' ')
+			throw std::runtime_error("Wrong format of input!");
+		record.date = line.substr(0, pos - 1);
+		record.value = parseValue(line.substr(pos + 2));
+		if(record.value < 0 || record.value > 1000)
+			throw std::runtime_error("input value is not in range of 0 to 1000!");
 	}
+	checkFormat(record.date);
+	validateDate(record.date);
+	return record;
 }
-void BitcoinExchange::loadData(const std::string& filename)
+
+void BitcoinExchange::processInput(t_record rec)
 {
-	std::ifstream inFile(fileName);
+
+}
+void BitcoinExchange::loadData(const std::string &filename)
+{
+	std::ifstream inFile(filename.c_str());
 	if (!inFile.is_open())
-		throw std::runtime_error("data can not be opened!");
+		throw std::runtime_error("data file can not be opened!");
 	std::string line;
-	getline(inFile, line);
+	std::getline(inFile, line);
 	if(line != "date,exchange_rate")
-	{
 		throw std::runtime_error("Wrong format of data");
-		return ;
-	}
-	while(getline(inFile, line))
+	while (std::getline(inFile, line))
 	{
-		t_record record = parse_record(line);
-		_data.insert(std::make_pair(record._date, record.value));
+		try
+		{
+			t_record record = parse_record(line, ',');
+			_data.insert(std::make_pair(record.date, record.value));
+		}
+		catch (const std::exception &e)
+		{
+			std::cerr << "Error: " << line << " => " << e.what() << std::endl;
+		}
 	}
+	inFile.close();
 }
 void BitcoinExchange::processInput(const std::string& filename)
 {
-
+	std::ifstream inFile(filename.c_str());
+	if (!inFile.is_open())
+		throw std::runtime_error("input file can not be opened!");
+	std::string line;
+	std::getline(inFile, line);
+	if(line != "date | value")
+		throw std::runtime_error("Wrong format of input");
+	while (std::getline(inFile, line))
+	{
+		try
+		{
+			t_record input_record = parse_record(line, '|');
+			processRecord(input_record);
+		}
+		catch (const std::exception &e)
+		{
+			std::cerr << "Error: " << line << " => " << e.what() << std::endl;
+		}
+	}
+	inFile.close();
 }
