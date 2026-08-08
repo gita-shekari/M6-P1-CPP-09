@@ -25,7 +25,7 @@ class BitcoinExchange
 		bool		isLeapYear(int year);
 		double		parseValue(const std::string &raw);
 		t_record	parse_record(const std::string &line, const char c);
-
+		void		processRecord(t_record rec);
 	public:
 		BitcoinExchange();
 		BitcoinExchange(const BitcoinExchange &other);

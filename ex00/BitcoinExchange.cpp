@@ -90,22 +90,23 @@ t_record BitcoinExchange::parse_record(const std::string &line, const char c)
 			throw std::runtime_error("Wrong format of input!");
 		record.date = line.substr(0, pos - 1);
 		record.value = parseValue(line.substr(pos + 2));
-		if(record.value < 0 || record.value > 1000)
-			throw std::runtime_error("input value is not in range of 0 to 1000!");
+		if(record.value < 0)
+			throw std::runtime_error("not a positive number.");
+		if(record.value > 1000)
+			throw std::runtime_error("too large a number.");
 	}
 	checkFormat(record.date);
 	validateDate(record.date);
 	return record;
 }
 
-void BitcoinExchange::processInput(t_record rec)
+void BitcoinExchange::processRecord(t_record rec)
 {
-	//    │
-    //        ├── find closest/equal date in _data
-    //        ├── get exchange rate
-    //        └── calculate value × rate
-	
-
+	std::map<std::string, double>::iterator it;
+	it = _data.upper_bound(rec.date);
+	if (it != _data.begin())
+		--it;
+	std::cout << rec.date << " => " << rec.value << " = " << rec.value * it->second << std::endl;
 }
 void BitcoinExchange::loadData(const std::string &filename)
 {
